@@ -1,0 +1,67 @@
+version: '3.3'
+
+services:
+#  rabbit-service:
+#    build: RabbitMain
+##    hostname: rabbitmq
+#    container_name: rabbit-service
+
+  rabbit:
+    image: rabbitmq:3.7-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    container_name: rabbit
+
+#  rabbitmq:
+#    build: RabbitMq
+#    hostname: rabbitmq
+#    ports:
+#      - 5672:5672
+#      - 15672:15672
+#    container_name: rabbitmq
+#  node-js:
+#    build: NodeJsApp
+#    ports:
+#      - 8800:8800
+#    depends_on:
+#      - rabbit
+#    container_name: node-js
+#
+#  postgres:
+#    image: postgres
+#    ports:
+#      - 5433:5432
+#    container_name: postgres
+#    environment:
+#      - POSTGRES_USER=postgres
+#      - POSTGRES_PASSWORD=docker
+#      - POSTGRES_DB=docker-db
+
+  cat-service:
+    build: CatService
+    depends_on:
+      - rabbit
+    container_name: cat-service
+
+  registry-service:
+    build: RegistryService
+    depends_on:
+      - rabbit
+      - cat-service
+    container_name: registry-service
+
+  zuul-service:
+    build: ZuulService
+    container_name: zuul-service
+    depends_on:
+      - cat-service
+      - registry-service
+
+  service-registry:
+    build: ServiceRegistry
+    container_name: eureka-server
+    depends_on:
+      - cat-service
+      - registry-service
+      - zuul-service
