@@ -40,12 +40,16 @@ services:
 
   cat-service:
     build: CatService
+    ports:
+      - 8081:8081
     depends_on:
       - rabbit
     container_name: cat-service
 
   registry-service:
     build: RegistryService
+    ports:
+      - 8083:8083
     depends_on:
       - rabbit
       - cat-service
@@ -54,13 +58,25 @@ services:
   zuul-service:
     build: ZuulService
     container_name: zuul-service
+    ports:
+      - 8080:8080
     depends_on:
       - cat-service
       - registry-service
 
+  registartion:
+    build: RegistrationService
+    container_name: registration
+    ports:
+      - 8082:8082
+    depends_on:
+      - rabbit
+
   service-registry:
     build: ServiceRegistry
     container_name: eureka-server
+    ports:
+      - 9000:9000
     depends_on:
       - cat-service
       - registry-service
